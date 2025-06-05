@@ -4,6 +4,7 @@
     "module": "commonjs",
     "strict": true,
     "noEmit": true,
+       "jsx": "react-jsx",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   }

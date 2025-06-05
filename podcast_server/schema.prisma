@@ -12,10 +12,35 @@ generator client {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  name      String    @default("")
-  email     String    @unique @default("")
-  password  String?
-  createdAt DateTime? @default(now())
-  isAdmin   Boolean   @default(false)
+  id                String    @id @default(cuid())
+  name              String    @default("")
+  email             String    @unique @default("")
+  password          String
+  favoritesPodcasts Podcast[] @relation("Podcast_favoritedBy")
+  createdAt         DateTime? @default(now())
+  isAdmin           Boolean   @default(false)
+}
+
+model Podcast {
+  id          String  @id @default(cuid())
+  title       String  @default("")
+  audio_uri   String  @default("")
+  video_uri   String  @default("")
+  artwork     String  @default("")
+  lyricist    String  @default("")
+  category    String  @default("")
+  type        String  @default("audio")
+  artist      Artist? @relation("Podcast_artist", fields: [artistId], references: [id])
+  artistId    String? @map("artist")
+  favoritedBy User[]  @relation("Podcast_favoritedBy")
+
+  @@index([artistId])
+}
+
+model Artist {
+  id                  String    @id @default(cuid())
+  name                String    @default("")
+  bio                 String    @default("")
+  photo               String    @default("")
+  from_Podcast_artist Podcast[] @relation("Podcast_artist")
 }

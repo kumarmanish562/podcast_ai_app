@@ -6,6 +6,8 @@ type User {
   name: String
   email: String
   password: PasswordState
+  favoritesPodcasts(where: PodcastWhereInput! = {}, orderBy: [PodcastOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PodcastWhereUniqueInput): [Podcast!]
+  favoritesPodcastsCount(where: PodcastWhereInput! = {}): Int
   createdAt: DateTime
   isAdmin: Boolean
 }
@@ -28,7 +30,7 @@ input UserWhereInput {
   id: IDFilter
   name: StringFilter
   email: StringFilter
-  password: PasswordFilter
+  favoritesPodcasts: PodcastManyRelationFilter
   createdAt: DateTimeNullableFilter
   isAdmin: BooleanFilter
 }
@@ -72,8 +74,10 @@ input NestedStringFilter {
   not: NestedStringFilter
 }
 
-input PasswordFilter {
-  isSet: Boolean!
+input PodcastManyRelationFilter {
+  every: PodcastWhereInput
+  some: PodcastWhereInput
+  none: PodcastWhereInput
 }
 
 input DateTimeNullableFilter {
@@ -109,8 +113,16 @@ input UserUpdateInput {
   name: String
   email: String
   password: String
+  favoritesPodcasts: PodcastRelateToManyForUpdateInput
   createdAt: DateTime
   isAdmin: Boolean
+}
+
+input PodcastRelateToManyForUpdateInput {
+  disconnect: [PodcastWhereUniqueInput!]
+  set: [PodcastWhereUniqueInput!]
+  create: [PodcastCreateInput!]
+  connect: [PodcastWhereUniqueInput!]
 }
 
 input UserUpdateArgs {
@@ -122,8 +134,163 @@ input UserCreateInput {
   name: String
   email: String
   password: String
+  favoritesPodcasts: PodcastRelateToManyForCreateInput
   createdAt: DateTime
   isAdmin: Boolean
+}
+
+input PodcastRelateToManyForCreateInput {
+  create: [PodcastCreateInput!]
+  connect: [PodcastWhereUniqueInput!]
+}
+
+type Podcast {
+  id: ID!
+  title: String
+  audio_uri: String
+  video_uri: String
+  artwork: String
+  lyricist: String
+  category: String
+  type: String
+  artist: Artist
+  favoritedBy(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
+  favoritedByCount(where: UserWhereInput! = {}): Int
+  favoritedCount: Int
+}
+
+input PodcastWhereUniqueInput {
+  id: ID
+}
+
+input PodcastWhereInput {
+  AND: [PodcastWhereInput!]
+  OR: [PodcastWhereInput!]
+  NOT: [PodcastWhereInput!]
+  id: IDFilter
+  title: StringFilter
+  audio_uri: StringFilter
+  video_uri: StringFilter
+  artwork: StringFilter
+  lyricist: StringFilter
+  category: StringFilter
+  type: StringFilter
+  artist: ArtistWhereInput
+  favoritedBy: UserManyRelationFilter
+}
+
+input UserManyRelationFilter {
+  every: UserWhereInput
+  some: UserWhereInput
+  none: UserWhereInput
+}
+
+input PodcastOrderByInput {
+  id: OrderDirection
+  title: OrderDirection
+  audio_uri: OrderDirection
+  video_uri: OrderDirection
+  artwork: OrderDirection
+  lyricist: OrderDirection
+  category: OrderDirection
+  type: OrderDirection
+}
+
+input PodcastUpdateInput {
+  title: String
+  audio_uri: String
+  video_uri: String
+  artwork: String
+  lyricist: String
+  category: String
+  type: String
+  artist: ArtistRelateToOneForUpdateInput
+  favoritedBy: UserRelateToManyForUpdateInput
+}
+
+input ArtistRelateToOneForUpdateInput {
+  create: ArtistCreateInput
+  connect: ArtistWhereUniqueInput
+  disconnect: Boolean
+}
+
+input UserRelateToManyForUpdateInput {
+  disconnect: [UserWhereUniqueInput!]
+  set: [UserWhereUniqueInput!]
+  create: [UserCreateInput!]
+  connect: [UserWhereUniqueInput!]
+}
+
+input PodcastUpdateArgs {
+  where: PodcastWhereUniqueInput!
+  data: PodcastUpdateInput!
+}
+
+input PodcastCreateInput {
+  title: String
+  audio_uri: String
+  video_uri: String
+  artwork: String
+  lyricist: String
+  category: String
+  type: String
+  artist: ArtistRelateToOneForCreateInput
+  favoritedBy: UserRelateToManyForCreateInput
+}
+
+input ArtistRelateToOneForCreateInput {
+  create: ArtistCreateInput
+  connect: ArtistWhereUniqueInput
+}
+
+input UserRelateToManyForCreateInput {
+  create: [UserCreateInput!]
+  connect: [UserWhereUniqueInput!]
+}
+
+type Artist {
+  id: ID!
+  name: String
+  bio: String
+  photo: String
+}
+
+input ArtistWhereUniqueInput {
+  id: ID
+}
+
+input ArtistWhereInput {
+  AND: [ArtistWhereInput!]
+  OR: [ArtistWhereInput!]
+  NOT: [ArtistWhereInput!]
+  id: IDFilter
+  name: StringFilter
+  bio: StringFilter
+  photo: StringFilter
+}
+
+input ArtistOrderByInput {
+  id: OrderDirection
+  name: OrderDirection
+  bio: OrderDirection
+  photo: OrderDirection
+}
+
+input ArtistUpdateInput {
+  name: String
+  bio: String
+  photo: String
+}
+
+input ArtistUpdateArgs {
+  where: ArtistWhereUniqueInput!
+  data: ArtistUpdateInput!
+}
+
+input ArtistCreateInput {
+  name: String
+  bio: String
+  photo: String
 }
 
 """
@@ -138,9 +305,22 @@ type Mutation {
   updateUsers(data: [UserUpdateArgs!]!): [User]
   deleteUser(where: UserWhereUniqueInput!): User
   deleteUsers(where: [UserWhereUniqueInput!]!): [User]
+  createPodcast(data: PodcastCreateInput!): Podcast
+  createPodcasts(data: [PodcastCreateInput!]!): [Podcast]
+  updatePodcast(where: PodcastWhereUniqueInput!, data: PodcastUpdateInput!): Podcast
+  updatePodcasts(data: [PodcastUpdateArgs!]!): [Podcast]
+  deletePodcast(where: PodcastWhereUniqueInput!): Podcast
+  deletePodcasts(where: [PodcastWhereUniqueInput!]!): [Podcast]
+  createArtist(data: ArtistCreateInput!): Artist
+  createArtists(data: [ArtistCreateInput!]!): [Artist]
+  updateArtist(where: ArtistWhereUniqueInput!, data: ArtistUpdateInput!): Artist
+  updateArtists(data: [ArtistUpdateArgs!]!): [Artist]
+  deleteArtist(where: ArtistWhereUniqueInput!): Artist
+  deleteArtists(where: [ArtistWhereUniqueInput!]!): [Artist]
   endSession: Boolean!
   authenticateUserWithPassword(email: String!, password: String!): UserAuthenticationWithPasswordResult
   createInitialUser(data: CreateInitialUserInput!): UserAuthenticationWithPasswordSuccess!
+  registerUser(name: String!, email: String!, password: String!): RegistrationResponse
 }
 
 union UserAuthenticationWithPasswordResult = UserAuthenticationWithPasswordSuccess | UserAuthenticationWithPasswordFailure
@@ -165,8 +345,15 @@ type Query {
   user(where: UserWhereUniqueInput!): User
   users(where: UserWhereInput! = {}, orderBy: [UserOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: UserWhereUniqueInput): [User!]
   usersCount(where: UserWhereInput! = {}): Int
+  podcast(where: PodcastWhereUniqueInput!): Podcast
+  podcasts(where: PodcastWhereInput! = {}, orderBy: [PodcastOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: PodcastWhereUniqueInput): [Podcast!]
+  podcastsCount(where: PodcastWhereInput! = {}): Int
+  artist(where: ArtistWhereUniqueInput!): Artist
+  artists(where: ArtistWhereInput! = {}, orderBy: [ArtistOrderByInput!]! = [], take: Int, skip: Int! = 0, cursor: ArtistWhereUniqueInput): [Artist!]
+  artistsCount(where: ArtistWhereInput! = {}): Int
   keystone: KeystoneMeta!
   authenticatedItem: AuthenticatedItem
+  getRecommendedPodcasts(userId: ID!): [podcastRecommendation]
 }
 
 union AuthenticatedItem = User
@@ -305,4 +492,28 @@ type KeystoneAdminUISort {
 enum KeystoneAdminUISortDirection {
   ASC
   DESC
+}
+
+type RegistrationResponse {
+  user: User
+}
+
+type podcastRecommendation {
+  id: ID!
+  title: String!
+  category: String!
+  video_uri: String
+  artwork: String
+  lyricist: String
+  audio_uri: String
+  type: String!
+  artist: ArtistInfo
+  isFavorited: Boolean!
+}
+
+type ArtistInfo {
+  id: ID!
+  name: String!
+  bio: String
+  photo: String
 }
