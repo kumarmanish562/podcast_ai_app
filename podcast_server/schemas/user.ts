@@ -1,7 +1,7 @@
 import { list } from "@keystone-6/core";
 import { text, password, checkbox, timestamp } from "@keystone-6/core/fields";
 
-export const user = list({
+export const User = list({
   access: {
     operation: {
       query: () => true,
@@ -11,7 +11,7 @@ export const user = list({
     },
   },
   fields: {
-    name: text ({ validation: { isRequired: true } }),
+    name: text({ validation: { isRequired: true } }),
     email: text({
       validation: { isRequired: true },
       isIndexed: "unique",
